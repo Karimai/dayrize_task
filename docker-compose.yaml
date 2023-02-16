@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  db:
+    container_name: postgresql_db
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - 54321:5432
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    networks:
+      - backend
+#    volumes:
+#      - ./postgres_data:/var/lib/postgresql/data/
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    ports:
+      - 5051:80
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - backend
+  app:
+    container_name: dayrizer_task
+    build: .
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - backend
+    volumes:
+      - .:/dayrizer_task
+
+
+networks:
+  backend:
+
+#volumes:
+#  postgres_data:
